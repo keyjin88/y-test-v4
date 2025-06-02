@@ -6,11 +6,9 @@ import ru.vavtech.ytestv4.model.Cash;
 import ru.vavtech.ytestv4.model.Currency;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для управления инвентарем денег в банкомате.
@@ -196,30 +194,6 @@ public class CashInventoryService {
             // Обязательно освобождаем write lock
             lock.writeLock().unlock();
         }
-    }
-
-    /**
-     * Получение списка доступных купюр для указанной валюты.
-     *
-     * Фильтрует общий инвентарь банкомата по критериям:
-     * - Совпадение валюты
-     * - Ненулевое количество купюр
-     *
-     * Возвращает только те номиналы, которые реально можно использовать
-     * в алгоритме поиска комбинации.
-     *
-     * @param currency валюта для фильтрации номиналов
-     * @return список доступных номиналов указанной валюты
-     */
-    public List<Cash> getAvailableCashByCurrency(Currency currency) {
-        return getCurrentInventory().entrySet().stream()
-                // Фильтр 1: только нужная валюта
-                // Фильтр 2: только номиналы с ненулевым количеством
-                .filter(entry -> entry.getKey().currency() == currency && entry.getValue() > 0)
-                // Извлекаем только ключи (объекты Cash) из пар ключ-значение
-                .map(Map.Entry::getKey)
-                // Собираем в изменяемый список для последующей сортировки
-                .collect(Collectors.toList());
     }
     
     /**
