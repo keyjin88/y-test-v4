@@ -83,7 +83,7 @@ public class WithdrawalService {
     private Map<Cash, Integer> findOptimalDispenseCombination(Currency currency, BigDecimal amount) {
         // Получаем доступные купюры для валюты, отсортированные по убыванию номинала
         List<Cash> availableCash = getAvailableCashByCurrency(currency);
-        availableCash.sort((c1, c2) -> c2.denomination().compareTo(c1.denomination()));
+        availableCash.sort((c1, c2) -> Integer.compare(c2.denomination(), c1.denomination()));
         
         Map<Cash, Integer> result = new HashMap<>();
         BigDecimal remainingAmount = amount;
@@ -91,16 +91,18 @@ public class WithdrawalService {
         // Жадный алгоритм: берем максимальное количество крупных купюр
         for (Cash cash : availableCash) {
             int availableCount = cashInventoryService.getCount(cash);
-            if (availableCount > 0 && remainingAmount.compareTo(cash.denomination()) >= 0) {
+            BigDecimal cashValue = BigDecimal.valueOf(cash.denomination());
+            
+            if (availableCount > 0 && remainingAmount.compareTo(cashValue) >= 0) {
                 
                 // Вычисляем максимальное количество купюр этого номинала
-                int maxPossible = remainingAmount.divideToIntegralValue(cash.denomination()).intValue();
+                int maxPossible = remainingAmount.divideToIntegralValue(cashValue).intValue();
                 int actualCount = Math.min(maxPossible, availableCount);
                 
                 if (actualCount > 0) {
                     result.put(cash, actualCount);
                     remainingAmount = remainingAmount.subtract(
-                            cash.denomination().multiply(BigDecimal.valueOf(actualCount)));
+                            cashValue.multiply(BigDecimal.valueOf(actualCount)));
                 }
             }
         }
@@ -162,7 +164,8 @@ public class WithdrawalService {
      */
     private BigDecimal calculateTotalAmount(Map<Cash, Integer> dispensedCash) {
         return dispensedCash.entrySet().stream()
-                .map(entry -> entry.getKey().denomination().multiply(BigDecimal.valueOf(entry.getValue())))
+                .map(entry -> BigDecimal.valueOf(entry.getKey().denomination())
+                        .multiply(BigDecimal.valueOf(entry.getValue())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     

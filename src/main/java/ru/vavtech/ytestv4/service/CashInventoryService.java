@@ -28,16 +28,16 @@ public class CashInventoryService {
         lock.writeLock().lock();
         try {
             // Инициализация рублевыми купюрами
-            inventory.put(new Cash(Currency.RUB, new BigDecimal("5000")), 10);
-            inventory.put(new Cash(Currency.RUB, new BigDecimal("1000")), 50);
-            inventory.put(new Cash(Currency.RUB, new BigDecimal("500")), 100);
-            inventory.put(new Cash(Currency.RUB, new BigDecimal("100")), 200);
+            inventory.put(new Cash(Currency.RUB, 5000), 10);
+            inventory.put(new Cash(Currency.RUB, 1000), 50);
+            inventory.put(new Cash(Currency.RUB, 500), 100);
+            inventory.put(new Cash(Currency.RUB, 100), 200);
             
             // Инициализация долларовыми купюрами
-            inventory.put(new Cash(Currency.USD, new BigDecimal("100")), 20);
-            inventory.put(new Cash(Currency.USD, new BigDecimal("50")), 30);
-            inventory.put(new Cash(Currency.USD, new BigDecimal("20")), 50);
-            inventory.put(new Cash(Currency.USD, new BigDecimal("10")), 100);
+            inventory.put(new Cash(Currency.USD, 100), 20);
+            inventory.put(new Cash(Currency.USD, 50), 30);
+            inventory.put(new Cash(Currency.USD, 20), 50);
+            inventory.put(new Cash(Currency.USD, 10), 100);
             
             log.info("Инвентарь банкомата инициализирован");
         } finally {
@@ -110,7 +110,8 @@ public class CashInventoryService {
         try {
             return inventory.entrySet().stream()
                     .filter(entry -> entry.getKey().currency() == currency)
-                    .map(entry -> entry.getKey().denomination().multiply(BigDecimal.valueOf(entry.getValue())))
+                    .map(entry -> BigDecimal.valueOf(entry.getKey().denomination())
+                            .multiply(BigDecimal.valueOf(entry.getValue())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         } finally {
             lock.readLock().unlock();

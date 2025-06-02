@@ -48,8 +48,8 @@ class WithdrawalServiceTest {
     @DisplayName("Успешное снятие денег")
     void withdraw_Success() {
         // Given
-        Cash cash1000 = new Cash(Currency.RUB, new BigDecimal("1000"));
-        Cash cash500 = new Cash(Currency.RUB, new BigDecimal("500"));
+        Cash cash1000 = new Cash(Currency.RUB, 1000);
+        Cash cash500 = new Cash(Currency.RUB, 500);
         
         Map<Cash, Integer> inventory = Map.of(
                 cash1000, 5,
@@ -96,7 +96,7 @@ class WithdrawalServiceTest {
     @DisplayName("Невозможно выдать точную сумму")
     void withdraw_InvalidAmount() {
         // Given
-        Cash cash1000 = new Cash(Currency.RUB, new BigDecimal("1000"));
+        Cash cash1000 = new Cash(Currency.RUB, 1000);
         Map<Cash, Integer> inventory = Map.of(cash1000, 5);
         
         // Запрашиваем 1500, но есть только купюры по 1000
