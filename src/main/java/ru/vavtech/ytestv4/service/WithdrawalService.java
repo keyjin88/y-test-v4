@@ -171,7 +171,7 @@ public class WithdrawalService {
     private Map<Cash, Integer> findOptimalDispenseCombination(Currency currency, BigDecimal amount) {
         // ШАГ 1: Получение и сортировка доступных номиналов
         // Получаем только номиналы нужной валюты с ненулевым количеством
-        List<Cash> availableCash = getAvailableCashByCurrency(currency);
+        List<Cash> availableCash = cashInventoryService.getAvailableCashByCurrency(currency);
         // Сортируем по убыванию номинала для жадного алгоритма
         // Integer.compare обеспечивает правильную сортировку чисел
         availableCash.sort((c1, c2) -> Integer.compare(c2.denomination(), c1.denomination()));
@@ -228,30 +228,6 @@ public class WithdrawalService {
         // Логируем успешный результат алгоритма
         log.debug("Найдена комбинация для суммы {}: {}", amount, result);
         return result;
-    }
-    
-    /**
-     * Получение списка доступных купюр для указанной валюты.
-     * 
-     * Фильтрует общий инвентарь банкомата по критериям:
-     * - Совпадение валюты
-     * - Ненулевое количество купюр
-     * 
-     * Возвращает только те номиналы, которые реально можно использовать
-     * в алгоритме поиска комбинации.
-     * 
-     * @param currency валюта для фильтрации номиналов
-     * @return список доступных номиналов указанной валюты
-     */
-    private List<Cash> getAvailableCashByCurrency(Currency currency) {
-        return cashInventoryService.getCurrentInventory().entrySet().stream()
-                // Фильтр 1: только нужная валюта
-                // Фильтр 2: только номиналы с ненулевым количеством
-                .filter(entry -> entry.getKey().currency() == currency && entry.getValue() > 0)
-                // Извлекаем только ключи (объекты Cash) из пар ключ-значение
-                .map(Map.Entry::getKey)
-                // Собираем в изменяемый список для последующей сортировки
-                .collect(Collectors.toList());
     }
     
     /**
