@@ -11,6 +11,7 @@ import ru.vavtech.ytestv4.model.WithdrawalResult;
 import ru.vavtech.ytestv4.service.CashInventoryService;
 import ru.vavtech.ytestv4.service.WithdrawalService;
 
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
@@ -32,18 +33,18 @@ public class ATMController {
      * Снятие денег из банкомата
      */
     @PostMapping("/withdraw")
-    public ResponseEntity<WithdrawalResult> withdraw(@RequestBody WithdrawRequest request) {
+    public ResponseEntity<WithdrawalResult> withdraw(@RequestBody @Valid WithdrawalRequest request) {
         
-        // Генерируем уникальный идентификатор сессии для операции
-        String sessionId = UUID.randomUUID().toString();
-        
-        WithdrawalRequest withdrawalRequest = WithdrawalRequest.builder()
-                .currency(request.currency())
-                .amount(request.amount())
-                .sessionId(sessionId)
+        // Если sessionId не передан в запросе, генерируем автоматически
+        WithdrawalRequest requestWithSession = request.getSessionId() != null 
+            ? request 
+            : WithdrawalRequest.builder()
+                .currency(request.getCurrency())
+                .amount(request.getAmount())
+                .sessionId(UUID.randomUUID().toString())
                 .build();
         
-        WithdrawalResult result = withdrawalService.withdraw(withdrawalRequest);
+        WithdrawalResult result = withdrawalService.withdraw(requestWithSession);
         
         HttpStatus status = switch (result.getStatus()) {
             case SUCCESS -> HttpStatus.OK;
@@ -78,22 +79,5 @@ public class ATMController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
-    }
-    
-    /**
-     * DTO для запроса снятия денег
-     */
-    public record WithdrawRequest(
-            Currency currency,
-            BigDecimal amount
-    ) {
-        public WithdrawRequest {
-            if (currency == null) {
-                throw new IllegalArgumentException("Валюта обязательна");
-            }
-            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Сумма должна быть положительной");
-            }
-        }
     }
 } 

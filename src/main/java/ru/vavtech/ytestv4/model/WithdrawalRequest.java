@@ -23,8 +23,8 @@ public class WithdrawalRequest {
     BigDecimal amount;
     
     /**
-     * Идентификатор сессии для обеспечения thread-safety
+     * Идентификатор сессии для трассировки операций.
+     * Может быть null для внешних API запросов - будет сгенерирован автоматически.
      */
-    @NotNull(message = "Идентификатор сессии обязателен")
     String sessionId;
 } 
