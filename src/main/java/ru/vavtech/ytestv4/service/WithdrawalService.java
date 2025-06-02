@@ -193,7 +193,7 @@ public class WithdrawalService {
             // Проверяем, стоит ли использовать этот номинал:
             // 1. Есть купюры в наличии (availableCount > 0)
             // 2. Номинал не превышает остаток (remainingAmount >= cashValue)
-            if (availableCount > 0 && remainingAmount.compareTo(cashValue) >= 0) {
+            if (remainingAmount.compareTo(cashValue) >= 0) {
                 
                 // Вычисляем максимальное количество купюр этого номинала
                 // divideToIntegralValue возвращает целую часть от деления
